@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar sintaxe do instalador Linux
+        run: bash -n install.sh
+      - name: Executar testes unitários (Python 3 stdlib)
+        run: python3 -m unittest -v test_baixar_insta.py

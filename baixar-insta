@@ -210,8 +210,20 @@ def done_streak(links, dest):
     return n
 
 
+def safe_name(s, fallback="item"):
+    clean = re.sub(r"[^\w.\- ]", "_", str(s or "")).strip(" .")
+    return clean if clean and clean not in (".", "..") else fallback
+
+
+def fetch_file(url, path):
+    part = path + ".part"
+    with urllib.request.urlopen(url, timeout=60) as r, open(part, "wb") as f:
+        shutil.copyfileobj(r, f)
+    os.replace(part, path)
+
+
 def owner_dir(dest, username, by_owner):
-    return os.path.join(dest, username) if by_owner and username else dest
+    return os.path.join(dest, safe_name(username)) if by_owner and username else dest
 
 
 def download(url, dest, by_owner=False):
@@ -236,12 +248,12 @@ def download(url, dest, by_owner=False):
 
     dest = owner_dir(dest, (media.get("user") or {}).get("username"), by_owner)
     os.makedirs(dest, exist_ok=True)
-    code = media.get("code") or uuid.uuid4().hex[:8]
+    code = safe_name(media.get("code"), uuid.uuid4().hex[:8])
     urls = media_urls(media)
     saved = []
     for i, (u, ext) in enumerate(urls, 1):
         path = os.path.join(dest, f"{code}_{i:02d}{ext}" if len(urls) > 1 else code + ext)
-        urllib.request.urlretrieve(u, path)
+        fetch_file(u, path)
         saved.append(path)
     return saved
 
@@ -285,7 +297,7 @@ def download_reel(url, dest, by_owner=False):
 
     dest = owner_dir(dest, user or (reel.get("user") or {}).get("username"), by_owner)
     if hid:
-        title = re.sub(r"[^\w\- ]", "", reel.get("title") or "").strip() or hid.group(1)
+        title = safe_name(re.sub(r"[^\w\- ]", "", reel.get("title") or ""), hid.group(1))
         dest = os.path.join(dest, "destaques", title)
     else:
         dest = os.path.join(dest, "stories")
@@ -293,9 +305,10 @@ def download_reel(url, dest, by_owner=False):
     saved = []
     for item in reel["items"]:
         (u, ext), = media_urls(item)
-        path = os.path.join(dest, str(item.get("pk") or item["id"]).split("_")[0] + ext)
+        pk = safe_name(str(item.get("pk") or item["id"]).split("_")[0])
+        path = os.path.join(dest, pk + ext)
         if not os.path.exists(path):
-            urllib.request.urlretrieve(u, path)
+            fetch_file(u, path)
             saved.append(path)
     return saved
 

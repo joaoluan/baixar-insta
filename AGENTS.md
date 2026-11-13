@@ -1,19 +1,34 @@
+<!-- Mantenha este arquivo conciso. Procedimentos de uso estão no README.md. -->
+
 # Instruções para agentes de IA (`baixar-insta`)
 
-## Visão geral
+## O que este repositório é
 
-Utilitário desktop Linux para baixar mídias do Instagram (posts, reels, carrosséis, stories, destaques e perfis) usando uma instância local do `camofox-browser` (`127.0.0.1:9377`) e diálogos `zenity`.
+Utilitário desktop e CLI (`baixar-insta`) para baixar fotos, vídeos, carrosséis, stories, destaques e perfis públicos do Instagram no Linux e no Windows, usando uma instância local do [`camofox-browser`](https://github.com/jo-inc/camofox-browser) (`127.0.0.1:9377`).
 
-## Arquivos principais
+## Arquitetura essencial
 
-- `baixar-insta` — Script Python 3 (stdlib pura) com CLI + GUI (`zenity` no Linux, `tkinter`/`ctypes` no Windows) e modo `--login`.
-- `install.sh` — Instalador idempotente para Linux (dependências, `camofox-browser`, `camofox.service` e atalhos `.desktop`).
-- `install.ps1` — Instalador para Windows via PowerShell (`winget`, `camofox-browser` e atalhos `.lnk`).
-- `test_baixar_insta.py` — Testes unitários do parser de URLs, extração de mídia JSON e resolução do binário `node`.
+- `baixar-insta` — Script único em Python 3 (apenas biblioteca padrão). Controla abas do Camoufox via HTTP local, extrai os objetos `image_versions2` e `video_versions` do JSON embutido na página (`<script type="application/json">`) e baixa a maior resolução disponível.
+- `install.sh` — Instalador idempotente para Linux (Ubuntu/Debian): garante dependências via `apt`, Node.js >= 22 (sistema ou NVM), clona/instala `camofox-browser`, configura `~/.config/systemd/user/camofox.service` e cria atalhos `.desktop`.
+- `install.ps1` — Instalador para Windows via PowerShell: garante Python 3, Node.js LTS e Git via `winget`, instala `camofox-browser` e cria atalhos `.lnk` na Área de Trabalho usando `pythonw.exe`.
+- `test_baixar_insta.py` — Suíte `unittest` rápida e 100% offline (sem rede e sem abrir navegador).
 
-## Regras do repositório
+## Invariantes obrigatórios
 
-1. Manter `baixar-insta` sem dependências externas de Python (apenas biblioteca padrão do Python 3).
-2. Nunca habilitar telemetria no serviço `camofox` (`CAMOFOX_CRASH_REPORT_ENABLED=false` sempre ativo).
-3. Nunca fazer commit de cookies, sessões (`~/.camofox/profiles`) ou mídias baixadas.
-4. Rodar `python3 test_baixar_insta.py` e `bash -n install.sh` antes de qualquer commit/push.
+1. **Integridade do modo Linux**: O fluxo Linux (`zenity`, `systemctl --user start camofox` e `xdg-open`) é a referência de uso diário. Qualquer ajuste multiplataforma deve ficar isolado sob `IS_WIN` (`os.name == "nt"`), sem alterar o comportamento no Linux.
+2. **Zero dependências externas no Python**: Usar exclusivamente a biblioteca padrão do Python 3 (`urllib`, `json`, `subprocess`, `re`, `glob`, `shutil`, `unittest`, `tkinter`/`ctypes`).
+3. **Privacidade e Segurança (repositório público)**:
+   - Sempre passar `CAMOFOX_BIND_HOST=127.0.0.1` e `CAMOFOX_CRASH_REPORT_ENABLED=false` ao iniciar o Camoufox (nunca expor a porta `9377`/`9378` na rede local nem enviar telemetria).
+   - Nunca versionar cookies, sessões (`~/.camofox/profiles`), mídias baixadas, caminhos pessoais fixos (`/home/<usuario>`) ou dados de contas reais.
+   - Sanitizar nomes de pastas e arquivos vindos do JSON (`username`, `code`, `pk`, `title` de destaques) contra path traversal (`..`, `/`, `\`) e gravação parcial (baixar em `.part` com timeout e renomear atomicamente com `os.replace`).
+4. **Ritmo humano (anti-bloqueio)**: Preservar as pausas aleatórias (`random.uniform(3, 7)` entre itens e `2.5..4.5s` na rolagem) e o aviso de usar **conta secundária** no modo `--login`.
+
+## Fluxo Git e Verificação
+
+1. Criar branch a partir da `main` atualizada, manter commits pequenos e abrir PR em **draft** (`gh pr create --draft`).
+2. Nunca fazer merge — apenas o usuário revisa e mescla.
+3. Antes de qualquer commit ou push, validar obrigatoriamente:
+   ```bash
+   python3 -m unittest -v test_baixar_insta.py
+   bash -n install.sh
+   ```
