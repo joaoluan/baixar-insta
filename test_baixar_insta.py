@@ -14,10 +14,16 @@ loader.exec_module(mod)
 class TestBaixarInsta(unittest.TestCase):
     def test_profile_name(self):
         self.assertEqual(mod.profile_name("https://www.instagram.com/nasa/"), "nasa")
-        self.assertEqual(mod.profile_name("https://instagram.com/joao.moura_1?igsh=123"), "joao.moura_1")
+        self.assertEqual(mod.profile_name("https://instagram.com/usuario.exemplo_1?igsh=123"), "usuario.exemplo_1")
         self.assertIsNone(mod.profile_name("https://www.instagram.com/p/ABC123/"))
         self.assertIsNone(mod.profile_name("https://www.instagram.com/reel/XYZ789/"))
         self.assertIsNone(mod.profile_name("https://www.instagram.com/stories/nasa/"))
+
+    def test_safe_name(self):
+        self.assertEqual(mod.safe_name("../etc/passwd"), "_etc_passwd")
+        self.assertEqual(mod.safe_name(".."), "item")
+        self.assertEqual(mod.safe_name("   ", "fallback"), "fallback")
+        self.assertEqual(mod.safe_name("Viagem 2026."), "Viagem 2026")
 
     def test_code_of(self):
         self.assertEqual(mod.code_of("/p/ABC123/"), "ABC123")
