@@ -6,8 +6,9 @@ Utilitário desktop Linux para baixar mídias do Instagram (posts, reels, carros
 
 ## Arquivos principais
 
-- `baixar-insta` — Script Python 3 (stdlib pura) com CLI + GUI `zenity` e modo `--login`.
-- `install.sh` — Instalador idempotente (dependências, `camofox-browser`, `camofox.service` e atalhos `.desktop`).
+- `baixar-insta` — Script Python 3 (stdlib pura) com CLI + GUI (`zenity` no Linux, `tkinter`/`ctypes` no Windows) e modo `--login`.
+- `install.sh` — Instalador idempotente para Linux (dependências, `camofox-browser`, `camofox.service` e atalhos `.desktop`).
+- `install.ps1` — Instalador para Windows via PowerShell (`winget`, `camofox-browser` e atalhos `.lnk`).
 - `test_baixar_insta.py` — Testes unitários do parser de URLs, extração de mídia JSON e resolução do binário `node`.
 
 ## Regras do repositório

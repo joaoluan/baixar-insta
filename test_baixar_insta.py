@@ -64,6 +64,15 @@ class TestBaixarInsta(unittest.TestCase):
         node = mod.find_node()
         self.assertTrue(isinstance(node, str) and len(node) > 0)
 
+    def test_find_node_windows_mode(self):
+        orig = mod.IS_WIN
+        try:
+            mod.IS_WIN = True
+            node = mod.find_node()
+            self.assertTrue(isinstance(node, str) and len(node) > 0)
+        finally:
+            mod.IS_WIN = orig
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,10 +1,10 @@
 # Baixar do Instagram (`baixar-insta`)
 
-Baixador de fotos, vídeos, carrosséis, stories, destaques e perfis inteiros do Instagram para Linux (Ubuntu/Debian), usando o navegador anti-detecção [camofox-browser](https://github.com/jo-inc/camofox-browser) em segundo plano e janelas simples via `zenity`.
+Baixador de fotos, vídeos, carrosséis, stories, destaques e perfis inteiros do Instagram para **Linux (Ubuntu/Debian)** e **Windows**, usando o navegador anti-detecção [camofox-browser](https://github.com/jo-inc/camofox-browser) em segundo plano.
 
 ---
 
-## Instalação em um PC novo
+## Instalação em um PC novo (Linux)
 
 Basta clonar o repositório e rodar o instalador:
 
@@ -15,7 +15,7 @@ cd ~/Projetos/baixar-insta
 ./install.sh
 ```
 
-### O que o `./install.sh` faz sozinho:
+### O que o `./install.sh` faz sozinho no Linux:
 1. Instala pacotes do sistema se faltarem (`python3`, `zenity`, `git`, `curl`, `xvfb`).
 2. Localiza o **Node.js >= 22** (ou instala automaticamente o Node 24 via NVM se o PC não tiver).
 3. Clona o `camofox-browser` em `~/Projetos/camofox-browser` e baixa o navegador Camoufox (`npm install`).
@@ -24,6 +24,25 @@ cd ~/Projetos/baixar-insta
 6. Cria os 2 ícones prontos para clicar na **Área de Trabalho** e no menu de aplicativos:
    - **Baixar do Instagram**
    - **Login Instagram (baixador)**
+
+---
+
+## Instalação em um PC novo (Windows)
+
+Abra o **PowerShell** e rode:
+
+```powershell
+mkdir "$HOME\Projetos" -Force
+git clone https://github.com/joaoluan/baixar-insta.git "$HOME\Projetos\baixar-insta"
+cd "$HOME\Projetos\baixar-insta"
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+### O que o `install.ps1` faz sozinho no Windows:
+1. Verifica/instala Python 3, Node.js LTS e Git via `winget` se faltarem.
+2. Clona o `camofox-browser` em `~\Projetos\camofox-browser` e roda `npm install`.
+3. Cria os 2 atalhos (`.lnk`) na **Área de Trabalho** do Windows usando `pythonw` (sem abrir tela preta do terminal).
+4. Quando você usa o ícone no Windows, o próprio script sobe o `camofox-browser` automaticamente em segundo plano se ainda não estiver rodando.
 
 ---
 
